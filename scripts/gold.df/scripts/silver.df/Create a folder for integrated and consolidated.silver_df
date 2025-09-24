@@ -1,0 +1,30 @@
+## saving consolidated silver table as a parquet file
+
+import os
+
+# Define folder path
+BASE_PATH = r"C:\Users\sy2825\Downloads\Python & pbi\silver file"
+
+# Create folder if it doesn’t exist
+os.makedirs(BASE_PATH, exist_ok=True)
+
+## save silver customers dataframe
+df_silv_cust.to_parquet(os.path.join(BASE_PATH, "silver_customers.parquet"), index=False)
+
+## save silver products table dataframe
+df_silv_prd.to_parquet(os.path.join(BASE_PATH, "silver_products.parquet"), index=False)
+
+## save silver store products dataframe
+df_silv_str_prd.to_parquet(os.path.join(BASE_PATH, "silver_store_products.parquet"), index=False)
+
+## save silver store dataframe
+df_silv_str.to_parquet(os.path.join(BASE_PATH, "silver_store.parquet"), index=False)
+
+## save silver sales person dataframe
+df_silv_sls_prs.to_parquet(os.path.join(BASE_PATH, "silver_sales_person.parquet"), index=False)
+
+## save silver sales order dataframe
+df_silv_sls_ord.to_parquet(os.path.join(BASE_PATH, "silver_sales_order.parquet"), index=False)
+
+## save silver ship dataframe
+df_silv_shp.to_parquet(os.path.join(BASE_PATH, "silver_ship.parquet"), index=False)
