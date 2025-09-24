@@ -1,0 +1,10 @@
+/*===========================================================================================
+Objective 1:
+## Data Cleaning: Whitespace trimming, unwanted characters removed, Numerical fields normalised
+## Clean and standardise unique identifier
+## Ensured naming convention in both tables follow a consistent format
+## Data Transformation: finding and Filling N/a Values
+## Data standardisation (Euros, £,$) converted to USD format
+## Derived columns(Customer_country, customer_state & Customer_postcode) from existing column
+## remove duplicates
+============================================================================================*/
