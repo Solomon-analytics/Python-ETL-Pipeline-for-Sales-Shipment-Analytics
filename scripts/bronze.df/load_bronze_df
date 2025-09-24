@@ -1,0 +1,115 @@
+-- =======================================================================================================
+'================== Loading Bronze Layer ==================';
+-- =======================================================================================================
+Script Purpose:
+     This scripts load data into the 'bronze' schema from external csv files.
+     It performs the following action:
+     - import necessary packages needed for this load
+     - defines reusable python functions
+-- -------------------------------------------------------------------------------------------------------
+SELECT '---------------------- Import Python packages ----------------';
+-- -------------------------------------------------------------------------------------------------------
+import pandas as pd
+import numpy as np
+import re
+
+-- --------------------------------------------------------------------------------------------------------
+'---------------------- define reusable python functions ----------------;
+-- --------------------------------------------------------------------------------------------------------
+def strip_whitespace(df, cols):
+    df[cols] = df[cols].astype(str).apply(lambda x: x.str.strip())
+    return df
+
+def remove_special_chars(df, cols, pattern=r"[',\-_&~.*+()]"):
+    df[cols] = df[cols].replace(pattern, '', regex=True)
+    return df
+
+def convert_to_category(df, cols):
+    df[cols] = df[cols].astype("category")
+    return df
+
+def convert_currency_to_usd(value, rates={"USD":1, "GBP":1.25, "EUR":1.17}):
+    val = str(value).strip().upper()
+    amount = float(re.sub(r"[^\d.]", "", val))
+    if "USD" in val or "$" in val:
+        return int(amount * rates["USD"])
+    elif "GBP" in val or "£" in val or "POUND" in val:
+        return int(amount * rates["GBP"])
+    elif "EUR" in val or "€" in val:
+        return int(amount * rates["EUR"])
+    else:
+        return np.nan
+
+def currency_flag(value):
+    v = str(value).upper()
+    if "USD" in v or "$" in v:
+        return "USD"
+    elif "GBP" in v or "£" in v or "POUND" in v:
+        return "GBP"
+    elif "EUR" in v or "€" in v:
+        return "EUR"
+    else:
+        return "unknown"
+
+
+def map_gender(df, col):
+    df[col] = df[col].map({"M":"Male", "F":"Female", "":"Unknown"})
+    return df
+
+def map_status(df, col):
+    df[col] = df[col].map({"I":"Inactive", "A":"Active", "":"Unknown"})
+    return df
+
+
+def convert_dates(df, cols, fmt="%Y%m%d"):
+    for col in cols:
+        df[col.replace("_id","")] = pd.to_datetime(df[col].astype(str), format=fmt, errors='coerce')
+    return df
+
+-- --------------------------------------------------------------------------------------------------------
+'---------------------- loading dataframes  ----------------;
+-- --------------------------------------------------------------------------------------------------------
+## erp customers table
+df_cust_erp = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\Customer_Erp.csv")
+
+## pos customers table
+df_cust_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\Customer_pos.csv")
+
+## erp products table
+df_prd_erp = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\products_ERP.csv")
+
+## pos products table
+df_prd_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\products_pos.csv")
+
+## erp store products table
+df_str_prd_erp = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\store_products_ERP.csv")
+
+## pos store products table
+df_str_prd_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\store_products_pos.csv")
+
+## erp store table
+df_str_erp = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\store_ERP.csv")
+
+## pos store table
+df_str_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\store_pos.csv")
+
+## sales person table
+df_sls_prs = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\sales_person.csv")
+
+## sales order erp table
+df_sls_ord = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\sales_orders_ERP.csv")
+
+## sales order pos table
+df_sls_ord_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\sales_orders_pos.csv")
+
+## ship erp table
+df_shp_erp = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\Ship_ERP.csv")
+
+## extracting ship pos table
+df_shp_pos = pd.read_csv(r"C:\Users\sy\Downloads\Python & pbi\Ship_pos.csv")
+
+
+
+
+
+
