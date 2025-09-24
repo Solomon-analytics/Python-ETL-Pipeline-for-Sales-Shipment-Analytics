@@ -52,7 +52,7 @@ def convert_dates(df, cols, fmt="%Y%m%d"):
     return df
 
 --------------------------------------------------------------------------------------------
-    -- ERP Customer data transformation
+    -- ERP Customer table; data transformation
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 objectives:
@@ -65,7 +65,7 @@ objectives:
 ## convert customer_status and customer_gender to category datatype
 ## convert attributes in customer_gender to a descriptive naming
 -----------------------------------------------------------------------------------------------
-## erp customers table
+
 df_cust_erp 
 
 ## Rename columns
@@ -95,6 +95,407 @@ df_cust_erp = map_gender(df_cust_erp, 'customer_gender')
 
 df_cust_erp
 
-/*--------------------------------------------------------------------------------------------
-    -- POS Customer data transformation
----------------------------------------------------------------------------------------------*/
+--------------------------------------------------------------------------------------------
+    -- POS Customer table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## Rename columns
+## modify from upper case to title case
+## strip unnecessary spaces
+## Remove special characters from columns
+## convert customer_age to integer
+## convert customer_status and customer_gender to category datatype
+## convert attributes in customer_gender to a descriptive naming
+## convert attributes in customer_status to a descriptive naming
+-----------------------------------------------------------------------------------------------
+## Rename columns
+df_cust_pos = df_cust_pos.rename(columns={
+        'id':'customer_id', 'status':'customer_status', 'names':'customer_name',
+        'address':'customer_address', 'email':'customer_email',
+        'gender':'customer_gender', 'Age':'customer_age'})
+
+## modify from upper case to title case
+df_cust_pos['customer_name'] = df_cust_pos['customer_name'].str.title()
+
+## strip unnecessary spaces
+df_cust_pos = strip_whitespace(df_cust_pos, df_cust_pos.columns)
+
+## Remove special characters from columns
+df_cust_pos = remove_special_chars(df_cust_pos, ['customer_id','customer_name'])
+
+## convert customer_age to integer
+df_cust_pos['customer_age'] = df_cust_pos['customer_age'].astype(int)
+
+## convert customer_status and customer_gender to category datatype
+df_cust_pos = convert_to_category(df_cust_pos, ['customer_status','customer_gender'])
+
+## convert attributes in customer_gender to a descriptive naming
+df_cust_pos = map_gender(df_cust_pos, 'customer_gender')
+
+## convert attributes in customer_status to a descriptive naming
+df_cust_pos = map_status(df_cust_pos, 'customer_status')
+
+df_cust_pos
+
+--------------------------------------------------------------------------------------------
+    -- erp products table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## drop columns
+## strip unnecsary white space
+## strip unnecsary white space
+## remove special character
+## standardise: convert all values in column, product_price to a unified currency(usd)
+## for validation, create a currency validation flag for future data entries
+-----------------------------------------------------------------------------------------------
+## erp products table
+
+## drop columns
+df_prd_erp = df_prd_erp.drop(columns=["product_height_weight","product_length_width","avg_product_cost","product_creation_date_id"], errors='ignore')
+
+## strip unnecsary white space
+df_prd_erp = strip_whitespace(df_prd_erp, ["product_id","product_name","store_location_name","product_number","product_price"])
+
+## remove special character
+df_prd_erp = remove_special_chars(df_prd_erp, ["product_name"])
+
+## standardise: convert all values in column, product_price to a unified currency(usd)
+df_prd_erp["price_usd"] = df_prd_erp["product_price"].apply(convert_currency_to_usd)
+
+## for validation, create a currency validation flag for future data entries
+df_prd_erp["currency_flag"] = df_prd_erp["product_price"].apply(currency_flag)
+
+df_prd_erp
+
+--------------------------------------------------------------------------------------------
+    -- pos products table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## drop columns
+## strip unnecsary white space
+## strip unnecsary white space
+## remove special character
+## standardise: convert all values in column, product_price to a unified currency(usd)
+## for validation, create a currency validation flag for future data entries
+-----------------------------------------------------------------------------------------------
+
+## pos products table
+
+## drop columns
+df_prd_pos = df_prd_pos.drop(columns=["product_height_weight","product_length_width","avg_product_cost","product_creation_date_id"], errors='ignore')
+
+## strip unnecsary white space
+df_prd_pos = strip_whitespace(df_prd_pos, ["product_id","product_name","store_location_name","product_number","product_price"])
+
+## remove special character
+df_prd_pos = remove_special_chars(df_prd_pos, ["product_name"])
+
+## standardise: convert all values in column, product_price to a unified currency(usd)
+df_prd_pos["price_usd"] = df_prd_pos["product_price"].apply(convert_currency_to_usd)
+
+## for validation, create a currency validation flag for future data entries
+df_prd_pos["currency_flag"] = df_prd_pos["product_price"].apply(currency_flag)
+
+df_prd_pos
+
+--------------------------------------------------------------------------------------------
+    -- erp store products table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## drop column
+## strip unnecesary white spaces
+## Remove special characters from columns
+## remove duplicates
+-----------------------------------------------------------------------------------------------
+df_str_prd_erp
+
+## drop column
+df_str_prd_erp = df_str_prd_erp.drop(columns=["received_date_id"], errors='ignore')
+
+## strip unnecesary white spaces
+df_str_prd_erp = strip_whitespace(df_str_prd_erp, ["store_location_id","product_id", "available_quantity", "blocked_quantity"])
+
+## Remove special characters from columns
+df_str_prd_erp = remove_special_chars(df_str_prd_erp, ['store_location_id','available_quantity', 'blocked_quantity'])
+
+## remove duplicates
+df_str_prd_erp = df_str_prd_erp.drop_duplicates()
+
+df_str_prd_erp
+
+--------------------------------------------------------------------------------------------
+    -- pos store products table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## drop column
+## strip unnecesary white spaces
+## Remove special characters from columns
+## remove duplicates
+-----------------------------------------------------------------------------------------------
+df_str_prd_pos
+
+df_str_prd_pos = df_str_prd_pos.drop(columns=["received_date_id"], errors='ignore')
+
+## strip unnecesary white spaces
+df_str_prd_pos = strip_whitespace(df_str_prd_pos, ["store_location_id","product_id", "available_quantity", "blocked_quantity"])
+
+## Remove special characters from columns
+df_str_prd_pos = remove_special_chars(df_str_prd_pos, ['store_location_id','available_quantity', 'blocked_quantity'])
+
+## remove duplicates
+df_str_prd_pos = df_str_prd_pos.drop_duplicates()
+
+df_str_prd_pos
+
+--------------------------------------------------------------------------------------------
+    -- erp store table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## 1. renamed column
+## 2. strip unnecessary white spaces from all columns and remove special character from column, 'store location id'
+## 3.  removing special character
+-----------------------------------------------------------------------------------------------
+df_str_erp 
+
+## 1. renamed column
+df_str_erp = df_str_erp.rename(columns={"Store_Location_id":"store_location_id"})
+
+## 2. strip unnecessary white spaces from all columns and remove special character from column, 'store location id'
+df_str_erp = strip_whitespace(df_str_erp, ["store_location_id","store_location_address"])
+
+## 3.  removing special character
+df_str_erp = remove_special_chars(df_str_erp, ["store_location_id"])
+
+df_str_erp
+
+--------------------------------------------------------------------------------------------
+    -- pos store table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## 1. renamed column
+## 2. strip unnecessary white spaces from all columns and remove special character from column, 'store location id'
+## 3.  removing special character
+-----------------------------------------------------------------------------------------------
+df_str_pos
+
+## 1. renamed column
+df_str_pos = df_str_pos.rename(columns={"Store_Location_id":"store_location_id"})
+
+## 2. strip unnecessary white spaces from all columns and remove special character from column, 'store location id'
+df_str_pos = strip_whitespace(df_str_pos, ["store_location_id","store_location_address"])
+
+## 3.  removing special character
+df_str_pos = remove_special_chars(df_str_pos, ["store_location_id"])
+
+df_str_pos
+
+--------------------------------------------------------------------------------------------
+    -- sales person table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## drop columns
+## strip unnecessary white spaces from all columns
+## remove unnecessary special characters from columns
+## modify column, sales_person_full_name from upper to title case
+## standardise column 'salary' to a unified currency rate (USD) and create a new column, 'salary_usd'
+## for validation, create a new column that check the currency for future data entries
+-----------------------------------------------------------------------------------------------
+df_sls_prs
+
+## drop columns
+df_sls_prs = df_sls_prs.drop(columns=["sales_person_name","hire_date_id"], errors='ignore')
+
+## strip unnecessary white spaces from all columns
+df_sls_prs = strip_whitespace(df_sls_prs, ["sales_person_id","store_location_id","sales_person_full_name","is_manager","salary"])
+
+## remove unnecessary special characters from columns
+df_sls_prs = remove_special_chars(df_sls_prs, ["store_location_id","sales_person_full_name"])
+
+## modify column, sales_person_full_name from upper to title case
+df_sls_prs["sales_person_full_name"] = df_sls_prs["sales_person_full_name"].str.title()
+
+## standardise column 'salary' to a unified currency rate (USD) and create a new column, 'salary_usd'
+df_sls_prs["salary_usd"] = df_sls_prs["salary"].apply(convert_currency_to_usd)
+
+## for validation, create a new column that check the currency for future data entries
+df_sls_prs["salary_currency_flag"] = df_sls_prs["salary"].apply(currency_flag)
+
+df_sls_prs
+
+--------------------------------------------------------------------------------------------
+    -- sales order erp table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## strip unnecessary white spaces from all columns
+## remove unnecessary special characters from columns
+## modifying column, 'sales_person_full_name' from upper to title case
+## renaming columns
+## converting columns, 'order creation date id', 'customer request date id', 'actual shipment date id' to a 'Date' format and create new columns for this attributes
+## convert colums, 'order line status' and 'payment method' to datatype 'categroy'
+## convert fact attributes to integer
+## drop duplicates
+-----------------------------------------------------------------------------------------------
+df_sls_ord
+
+## strip unnecessary white spaces from all columns
+df_sls_ord = strip_whitespace(df_sls_ord, df_sls_ord.columns)
+
+## remove unnecessary special characters from columns
+df_sls_ord = remove_special_chars(df_sls_ord, ["store_location_id","customer_id","ordered_quantity","cancelled_quantity","returned_quantity", "discount_amount", "sales_person_full_name"])
+
+## modifying column, 'sales_person_full_name' from upper to title case
+df_sls_ord["sales_person_full_name"] = df_sls_ord["sales_person_full_name"].str.title()
+
+## renaming columns
+df_sls_ord = df_sls_ord.rename(columns={"customer_request_dateid":"customer_request_date_id", "actual_shipment_dateid": "actual_shipment_date_id", "Order_Creation_date_id":"order_creation_date_id"})
+
+## converting columns, 'order creation date id', 'customer request date id', 'actual shipment date id' to a 'Date' format and create new columns for this attributes
+df_sls_ord = convert_dates(df_sls_ord, ["order_creation_date_id","customer_request_date_id","actual_shipment_date_id"])
+
+## convert colums, 'order line status' and 'payment method' to datatype 'categroy'
+df_sls_ord[["order_line_status","payment_method"]] = df_sls_ord[["order_line_status","payment_method"]].astype('category')
+
+## convert fact attributes to integer
+df_sls_ord[["ordered_quantity","cancelled_quantity","returned_quantity"]] = df_sls_ord[["ordered_quantity","cancelled_quantity","returned_quantity"]].astype(int)
+
+## drop duplicates
+df_sls_ord.drop_duplicates(inplace = True)
+
+df_sls_ord
+
+--------------------------------------------------------------------------------------------
+    -- sales order pos table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## strip unnecessary white spaces from all columns
+## remove unnecessary special characters from columns
+## modifying column, 'sales_person_full_name' from upper to title case
+## renaming columns
+## converting columns, 'order creation date id', 'customer request date id', 'actual shipment date id' to a 'Date' format and create new columns for this attributes
+## convert colums, 'order line status' and 'payment method' to datatype 'categroy'
+## convert fact attributes to integer
+## drop duplicates
+-----------------------------------------------------------------------------------------------
+
+df_sls_ord_pos
+
+## strip unnecessary white spaces from all columns
+df_sls_ord_pos = strip_whitespace(df_sls_ord_pos, df_sls_ord_pos.columns)
+
+## remove unnecessary special characters from columns
+df_sls_ord_pos = remove_special_chars(df_sls_ord_pos, ["customer_id","ordered_quantity","cancelled_quantity","returned_quantity", "discount_amount", "sales_person_full_name"])
+
+## modifying column, 'sales_person_full_name' from upper to title case
+df_sls_ord_pos["sales_person_full_name"] = df_sls_ord_pos["sales_person_full_name"].str.title()
+
+## renaming columns
+df_sls_ord_pos = df_sls_ord_pos.rename(columns={"customer_request_dateid":"customer_request_date_id", "actual_shipment_dateid": "actual_shipment_date_id", "Order_Creation_date_id":"order_creation_date_id"})
+
+## converting columns, 'order creation date id', 'customer request date id', 'actual shipment date id' to a 'Date' format and create new columns for this attributes
+df_sls_ord_pos = convert_dates(df_sls_ord_pos, ["order_creation_date_id","customer_request_date_id","actual_shipment_date_id"])
+
+## convert colums, 'order line status' and 'payment method' to datatype 'categroy'
+df_sls_ord_pos[["order_line_status","payment_method"]] = df_sls_ord_pos[["order_line_status","payment_method"]].astype('category')
+
+## convert fact attributes to integer
+df_sls_ord_pos[["ordered_quantity","cancelled_quantity","returned_quantity"]] = df_sls_ord_pos[["ordered_quantity","cancelled_quantity","returned_quantity"]].astype(int)
+
+## drop duplicates
+df_sls_ord_pos.drop_duplicates(inplace = True)
+
+df_sls_ord_pos
+
+--------------------------------------------------------------------------------------------
+    -- ship erp table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## removing unnecessary white spaces
+## remove special characters
+## renaming columns
+## convert 'date_id' columns to date formats
+## standardise column 'freight amount' to a unified currency rate(usd) and creating a new column based on the existing column
+## create a new column, freight amount currency validation check
+## convert columns to category datatype
+## convert fact columns to integer datatype
+## drop duplicates
+-----------------------------------------------------------------------------------------------
+df_shp_erp
+
+## removing unnecessary white spaces
+df_shp_erp = strip_whitespace(df_shp_erp, df_shp_erp.columns)
+
+## remove special characters
+df_shp_erp = remove_special_chars(df_shp_erp, ["ship_id","store_location_id","customer_id","cancelled_quantity","shipped_quantity","delivered_quantity"])
+
+## renaming columns
+df_shp_erp = df_shp_erp.rename(columns={"delivery_dateid":"delivery_date_id"})
+
+## convert 'date_id' columns to date formats
+df_shp_erp = convert_dates(df_shp_erp, ["delivery_date_id","ship_date_id"])
+
+## standardise column 'freight amount' to a unified currency rate(usd) and creating a new column based on the existing column
+df_shp_erp["freight_amount_usd"] = df_shp_erp["freight_amount"].apply(convert_currency_to_usd)
+
+## create a new column, freight amount currency validation check
+df_shp_erp["freight_currency_flag"] = df_shp_erp["freight_amount"].apply(currency_flag)
+
+## convert columns to category datatype
+df_shp_erp[["delivery_status","delivery_type","shipping_method","carrier"]] = df_shp_erp[["delivery_status","delivery_type","shipping_method","carrier"]].astype('category')
+
+## convert fact columns to integer datatype
+df_shp_erp[["cancelled_quantity","shipped_quantity","delivered_quantity","freight_amount_usd"]] = df_shp_erp[["cancelled_quantity","shipped_quantity","delivered_quantity","freight_amount_usd"]].astype(int)
+
+## drop duplicates
+df_shp_erp = df_shp_erp.drop_duplicates()
+
+df_shp_erp
+
+--------------------------------------------------------------------------------------------
+    -- ship pos table; data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+## removing unnecessary white spaces
+## remove special characters
+## renaming columns
+## convert 'date_id' columns to date formats
+## convert columns to category datatype
+## convert fact columns to integer datatype
+## drop duplicates
+-----------------------------------------------------------------------------------------------
+df_shp_pos
+
+## removing unnecessary white spaces
+df_shp_pos = strip_whitespace(df_shp_pos, df_shp_pos.columns)
+
+## remove special characters
+df_shp_pos = remove_special_chars(df_shp_pos, ["ship_id","store_location_id","customer_id","cancelled_quantity","shipped_quantity","delivered_quantity"])
+
+## renaming columns
+df_shp_pos = df_shp_pos.rename(columns={"delivery_dateid":"delivery_date_id"})
+
+## convert 'date_id' columns to date formats
+df_shp_pos = convert_dates(df_shp_pos, ["delivery_date_id","ship_date_id"])
+
+## convert columns to category datatype
+df_shp_pos[["delivery_status","delivery_type","shipping_method","carrier"]] = df_shp_pos[["delivery_status","delivery_type","shipping_method","carrier"]].astype('category')
+
+## convert fact columns to integer datatype
+df_shp_pos[["cancelled_quantity","shipped_quantity","delivered_quantity"]] = df_shp_pos[["cancelled_quantity","shipped_quantity","delivered_quantity"]].astype(int)
+
+## drop duplicates
+df_shp_pos = df_shp_pos.drop_duplicates()
+
+df_shp_pos
