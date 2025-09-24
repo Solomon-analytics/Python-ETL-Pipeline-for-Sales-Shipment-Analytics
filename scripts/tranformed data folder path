@@ -1,0 +1,60 @@
+/*
+=========================================================================
+Creating a folder for tranformed dataframe (Raw data ---> Transformed Data)
+=========================================================================
+Script purpose:
+  This script saves transformed dataframe in a folder as a parquet file.
+
+import os
+import pandas as pd
+============================================================================
+Action performed:
+- defines folder path
+- creates folder if it does not exist
+- save transformed data as a parquet file in a silver folder.
+============================================================================
+# Define folder path
+BASE_PATH = r"C:\Users\sy\Downloads\Python & pbi\Bronze file"
+
+# Create folder if it doesn’t exist
+os.makedirs(BASE_PATH, exist_ok=True)
+
+## save ERP Customers DataFrame
+df_cust_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_customers.parquet"), index=False)
+
+## save POS Customers DataFrame
+df_cust_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_customers.parquet"), index=False)
+
+## save erp product table dataframe
+df_prd_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_products.parquet"), index=False)
+
+## save pos product table dataframe
+df_prd_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_products.parquet"), index=False)
+
+## save erp store products dataframe
+df_str_prd_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_store_products.parquet"), index=False)
+
+## save pos store products dataframe
+df_str_prd_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_store_products.parquet"), index=False)
+
+
+## save erp store dataframe
+df_str_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_store.parquet"), index=False)
+
+## save pos store dataframe
+df_str_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_store.parquet"), index=False)
+
+## save sales person dataframe
+df_sls_prs.to_parquet(os.path.join(BASE_PATH, "bronze_sales_person.parquet"), index=False)
+
+## save erp sales order dataframe
+df_sls_ord.to_parquet(os.path.join(BASE_PATH, "bronze_erp_sales_order.parquet"), index=False)
+
+## save pos sales order dataframe
+df_sls_ord_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_sales_order.parquet"), index=False)
+
+## save erp ship dataframe
+df_shp_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_ship.parquet"), index=False)
+
+## save pos ship dataframe
+df_shp_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_ship.parquet"), index=False)
