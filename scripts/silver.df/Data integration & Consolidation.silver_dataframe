@@ -57,10 +57,261 @@ def extract_after_last(value):
     if not isinstance(value, str):
         return None
     return value.split("~")[-1].strip()
-============================================================================================
+--------------------------------------------------------------------------------------------
+    -- Customer table; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## consolicate transformed (ERP & POS) dataframe
+## check for duplicates
+## creating additional column, age_category
+## create addditional columns, customer_address, customer_city, customer_country
+## create a column df_created_at
+-----------------------------------------------------------------------------------------------
+## consolicate transformed (ERP & POS) dataframe
+df_silv_cust = pd.concat([df_cust_erp, df_cust_pos], ignore_index=True)
+df_silv_cust
+
+## check for duplicates
+df_silv_cust.duplicated().sum() ## no duplicates recorded in this dataframe
+
+## creating additional column, age_category
+df_silv_cust["age_category"] = df_silv_cust["customer_age"].apply(age_category)
+
+## create addditional columns, customer_address, customer_city, customer_country, customer_postcode
+df_silv_cust[["customer_address", "customer_city", "customer_country"]] = (
+    df_silv_cust["customer_address"].apply(lambda x: pd.Series(split_address(x))))
+
+## creating a column df_created_at
+df_silv_cust["df_created_at"] = datetime.now()
+
+df_silv_cust
+
+--------------------------------------------------------------------------------------------
+    -- products; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## consolicate transformed products (ERP & POS) dataframe
+## check for duplicates
+## creating additional column, age_category
+## create addditional columns, customer_address, customer_city, customer_country, customer_postcode
+## create new column product_category from column, 'product_name'
+## create validation flag: to check if future data entries is the same as current data entry
+## create a column df_created_at
+-----------------------------------------------------------------------------------------------
+## consolidate transformed products (ERP & POS) dataframe:
+df_silv_prd = pd.concat([df_prd_erp, df_prd_pos], ignore_index=True)
+df_silv_prd
+
+## check for duplicates
+df_silv_prd.duplicated().sum()
+
+## extract product_category from column, 'product_name'
+prod_cat = [
+    "Beauty Personal Care",
+    "Automotive",
+    "Fashion Apparel",
+    "Home Living",
+    "Electronics",
+    "Sports Fitness"
+]
+
+def extract_category(product_name):
+    name = product_name.strip().lower()
+    for cat in prod_cat:
+        # Split prod_cat into words and check if all appear in product_name
+        cat_words = cat.lower().split()
+        if all(word in name for word in cat_words):
+            return cat
+    return "Unknown"
+
+# Apply function
+df_silv_prd["product_category"] = df_silv_prd["product_name"].apply(extract_category)
+
+# Create validation flag: to check if future data entries is the same as current data entry
+df_silv_prd["category_valid_flag"] = df_silv_prd["product_category"].apply(
+    lambda x: "Valid" if x != "Unknown" else "Invalid"
+)
+
+## create a column df_created_at
+df_silv_prd["df_created_at"] = datetime.now()
+
+df_silv_prd
+
+--------------------------------------------------------------------------------------------
+    -- store products; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## consolicate transformed products (ERP & POS) dataframe
+## check for duplicates
+## extract product_id from product_id column
+## create custom columns, reserved inventory and unreserved inventory
+## create a column df_created_at
+-----------------------------------------------------------------------------------------------
+## consolidate transformed store products (ERP & POS) dataframe:
+df_silv_str_prd = pd.concat([df_str_prd_erp, df_str_prd_pos], ignore_index=True)
+
+## create new column, product_id
+df_silv_str_prd["product_id"] = df_silv_str_prd["product_id"].apply(extract_after_last)
+
+## modify data types
+df_silv_str_prd[["available_quantity", "blocked_quantity"]] = df_silv_str_prd[["available_quantity", "blocked_quantity"]].astype(int)
+
+## create custom columns, reserved_inventory and unreserved_inventory
+df_silv_str_prd["reserved_inventory"] = df_silv_str_prd["blocked_quantity"].fillna(0)
+df_silv_str_prd["unreserved_inventory"] = df_silv_str_prd["available_quantity"].fillna(0) - df_silv_str_prd["blocked_quantity"].fillna(0)
+
+## create a column df_created_at
+df_silv_str_prd["df_created_at"] = datetime.now()
+
+df_silv_str_prd
+
+--------------------------------------------------------------------------------------------
+    -- store; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## create custom columns, customer_address, customer_city, customer_state
+## create a column df_created_at
+-----------------------------------------------------------------------------------------------
+## consolidate transformed store (ERP & POS) dataframe:
+df_silv_str = pd.concat([df_str_erp, df_str_pos], ignore_index=True)
+
+## create addditional columns, store_address, store_city, store_country
+df_silv_str[["store_address", "store_city", "store_country"]] = (
+    df_silv_str["store_location_address"].apply(lambda x: pd.Series(split_address(x))))
+
+## create a column df_created_at
+df_silv_str["df_created_at"] = datetime.now()
+
+df_silv_str
+
+--------------------------------------------------------------------------------------------
+    -- sales person; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## create a column df_created_at
+-----------------------------------------------------------------------------------------------
+df_silv_sls_prs = df_sls_prs
+
+## create a column df_created_at
+df_silv_sls_prs["df_created_at"] = datetime.now()
+
+df_silv_sls_prs
+
+--------------------------------------------------------------------------------------------
+    -- sales orders; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## check for duplicates
+## Business validation Rule 1: When (cancelled_quantity + returned_quantity) > ordered_quantity then set each of these columns to n/a
+## create validation flag for traceability
+# Business validation Rule 2: Validation check on order_creation_date
+## creation column, quantity_purchased
+## create a column df_created_at
+
+-----------------------------------------------------------------------------------------------
+## consolidate transformed sales orders (ERP & POS) dataframe:
+df_silv_sls_ord = pd.concat([df_sls_ord, df_sls_ord_pos], ignore_index=True)
+
+import numpy as np
+
+## check for duplicates
+df_silv_sls_ord.duplicated().sum()
+
+## Business validation Rule 1: When (cancelled_quantity + returned_quantity) > ordered_quantity then set each of 
+these columns to n/a
+
+invalid_qty = (
+    (df_silv_sls_ord["cancelled_quantity"].fillna(0) + df_silv_sls_ord["returned_quantity"].fillna(0))
+    > df_silv_sls_ord["ordered_quantity"].fillna(0)
+)
+
+## Set values to NULL (NaN in pandas)
+df_silv_sls_ord.loc[invalid_qty, ["ordered_quantity","cancelled_quantity","returned_quantity"]] = np.nan
+
+## create validation flag for traceability
+df_silv_sls_ord["ordered_cancelled_received_quantity_validation_flag"] = np.where(
+    invalid_qty, "N", "Y"
+)
+
+# Business validation Rule 2: Validation check on order_creation_date
+df_silv_sls_ord["order_date_validation_flag"] = np.where(
+    (df_silv_sls_ord["order_creation_date"] > df_silv_sls_ord["customer_request_date"]) |
+    (df_silv_sls_ord["order_creation_date"] > df_silv_sls_ord["actual_shipment_date"]),
+   "invalid", "valid")
+
+## creation column, quantity_purchased
+df_silv_sls_ord["purchased_quantity"]  =  (df_silv_sls_ord["ordered_quantity"].fillna(0) - 
+(df_silv_sls_ord["returned_quantity"].fillna(0) + df_silv_sls_ord["cancelled_quantity"].fillna(0))).astype(int)
 
 
+## create a column df_created_at
+df_silv_sls_ord["df_created_at"] = datetime.now()
+
+df_silv_sls_ord
+
+--------------------------------------------------------------------------------------------
+    -- ship; data consolidation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## check for duplicates
+## Business validation Rule 1: When (cancelled_quantity + returned_quantity) > ordered_quantity then set each of these columns to n/a
+## create validation flag for traceability
+# Business validation Rule 2: Validation check on order_creation_date
+## creation column, quantity_purchased
+## create a column df_created_at
+
+-----------------------------------------------------------------------------------------------
+## consolidate transformed ship (ERP & POS) dataframe:
+df_silv_shp = pd.concat([df_shp_pos, df_shp_erp], ignore_index=True)
+
+import numpy as np
+
+## check for duplicates
+df_silv_shp.duplicated().sum()
+
+## drop columns
+df_silv_shp = df_silv_shp.drop(columns = {"freight_amount", "freight_amount_usd", "freight_currency_flag"})
 
 
+## Business validation Rule 1: When (delivered_quantity + cancelled_quantity) > shipped_quantity then set each of these columns to n/a
+invalid_qty = (
+    (df_silv_shp ["cancelled_quantity"].fillna(0) + df_silv_shp["delivered_quantity"].fillna(0))
+    > df_silv_shp["shipped_quantity"].fillna(0)
+)
+
+## Set values to NULL (NaN in pandas)
+df_silv_shp.loc[invalid_qty, ["shipped_quantity","cancelled_quantity","delivered_quantity"]] = np.nan
+
+## create validation flag for quantity value traceability
+df_silv_shp["ordered_cancelled_received_quantity_validation_flag"] = np.where(
+    invalid_qty, "N", "Y")
 
 
+## replacing delivered_quantity with a custom calculation
+df_silv_shp["delivered_quantity"] = df_silv_shp["shipped_quantity"].fillna(0) - df_silv_shp["cancelled_quantity"].fillna(0)
+
+
+# Business validation Rule 2: Validation check on delivery_date and ship_date
+df_silv_shp ["delivery_ship_date_validation_flag"] = np.where(
+    (df_silv_shp ["delivery_date"] < df_silv_shp ["ship_date"]),
+    "invalid", "valid"
+)
+
+## create a column df_created_at
+df_silv_shp["df_created_at"] = datetime.now()
+
+df_silv_shp
