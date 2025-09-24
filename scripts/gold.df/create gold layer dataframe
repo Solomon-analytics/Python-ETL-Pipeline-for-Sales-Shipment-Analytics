@@ -1,0 +1,9 @@
+-- ==================================================================
+-- Create Gold Layer Dataframe
+-- ==================================================================
+Script purpose:
+This script creates a business-ready dataframe
+
+Ech view performs transformations and combines data from the silver
+layer views to produce a clean, enriched, and business-ready dataset.
+-- ===================================================================
