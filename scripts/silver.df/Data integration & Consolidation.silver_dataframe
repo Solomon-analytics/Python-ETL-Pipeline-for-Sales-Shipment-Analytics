@@ -11,8 +11,9 @@ Action performed:
 - create additional columns based on business requirements
 - create a validation flags for future data entries
 - create a creation date column that indicates when dataframe was created
-==========================================================================
-Defining resusable python functions:
+/*-- --------------------------------------------------------------------------------------------------------
+'---------------------- define reusable python functions ----------------;
+-- --------------------------------------------------------------------------------------------------------*/
 
 def age_category(age):
     try:
