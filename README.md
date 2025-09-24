@@ -1,56 +1,57 @@
 **Sales Orders & Shipment Data Warehouse (Python)**
-This project showcase how to build an end-to-end data warehouse and reporting solution for sales orders and shipment data and solves real world business problem of making data available for data analysis and reporting consumption.
+---
+This project showcase how to build an end-to-end data warehouse and reporting solution for sales orders and shipment data using medallion architecture best practices which extract data from ultiple sources and stored in its raw form in a bronze layer, then goes through different layers of transformation with the outcome stored in a silver layer, the final layer is where the business rules are applied and outcome is stored in the gold layer, which indicates the data in this layer is ready for analysis and reporting purposes.
 
 ---
-## Key Features
+The raw data came is sourced from two different systems:
+Please note that, all data used in this project is simulated and generated for learning purposes.
+- ERP (Enterprise Resource Planning): contains sales orders, product information, store data, and shipment details.
+- POS (Point of sales): contains sales transactions, product and store details, customer information, and shipment data.
 
-- Data Extraction & ETL: Used Python (Pandas + SQLAlchemy) to extract raw sales, customer, and shipment data from multiple CSV/SQL sources.
+---
 
-- Data Transformation: Cleaned and transformed datasets (handling duplicates, missing values, and inconsistent formats).
-
+**Project Overview**
+---
+This project covers the full data lifecycle:
+- Data Architecture: Designing a modern Data Warehouse using the Medallion Architecture Bronze, Silver, and Gold layers
+- ETL Pipelines: Extracting, transforming, and loading data from POS and ERP source systems into the warehouse
 - Data Modelling: Designed a star schema for orders, shipments, customers, and products, supporting scalable analytics.
-
-- Automation: Built Python scripts to automate ETL workflows, reducing manual processing.
-
-- Analytics & Reporting: Developed SQL stored procedures and Power BI dashboards to track KPIs such as order volume, on-time delivery, and customer performance.
+- Analytical & Reporting creating SQL-based reports using Views and dashboards to deliver actionable insights for stakeholders.
 
 ---
 
-📦 Sales Orders & Shipment Data Warehouse (Python + SQL + Power BI)
-This project demonstrates how to build an end-to-end data warehouse and reporting solution for sales orders and shipment data.
+**Project Requirements**
+---
+**Building the sales orders and shipment data warehouse (Python)**
 
-🔹 Key Features
+**Objective:**
+Develop a modern data warehouse using Python to consolidate data from POS and ERP sources for each of the data fr sales, shipment, stores, store products, products, sales person, making it ready for analysis and reporting.
 
-Data Extraction & ETL: Used Python (Pandas + SQLAlchemy) to extract raw sales, customer, and shipment data from multiple CSV/SQL sources.
-
-Data Transformation: Cleaned and transformed datasets (handling duplicates, missing values, and inconsistent formats).
-
-Data Modelling: Designed a star schema for orders, shipments, customers, and products, supporting scalable analytics.
-
-Automation: Built Python scripts to automate ETL workflows, reducing manual processing.
-
-Analytics & Reporting: Developed SQL stored procedures and Power BI dashboards to track KPIs such as order volume, on-time delivery, and customer performance.
+**Key Features**:
+- **Data Extraction & ETL**: Used Python (Pandas) to extract raw sales, customer, and shipment data from multiple CSV/SQL sources.
+- **Data Quality**: Cleaned and transformed datasets (handling duplicates, missing values, and inconsistent formats).
+- **Data Integration**: Consolidate data from ERP and POS into a single, user-friendly data model designed for analytical queries and reporting.
+- **Automation**: Built Python scripts to automate ETL workflows, reducing manual processing.
+- **Documentation**: Provide clear documentation of the data model to support both business stakeholders and analytics team.
 
 ---
+
+## Data Analysis (Business intelligence & Reporting)
+
+**Objective**:
+Develop a list of analytics reporting using Pandas, Numpy, Matplotlib, Seaborn to uncovers insights into:
+- Customer Purchasing Behaviour
+- Product Performance
+- Sales Orders Trends
+- Shipment Efficiency
+  These insights empowers stakeholders within the business identofy/track key business metrics, enabling informed decision-making
+
+  ---
 
 **Outcomes**:
 
-Automated recurring analysis of orders and shipments, reducing reporting time.
+- Automated recurring analysis of orders and shipments, reducing reporting time.
+- Aim to deliver inteactive Power BI dashboards that provide actionable insights into sales trends, shipment delays, and customer behaviour.
+- Aim to enable business users to identify bottlenecks and optimise supply chain efficiency.
 
-Delivered interactive dashboards that provide actionable insights into sales trends, shipment delays, and customer behaviour.
 
-Enabled business users to identify bottlenecks and optimise supply chain efficiency.
-
-👉 This way, recruiters/technical reviewers who land on your GitHub see: problem → tools → value delivered.
-
-Do you want me to also rewrite your other GitHub project descriptions (like Customer Churn, Supply Chain, etc.) so they all follow this clear, business-value format?
-
-Automated recurring analysis of orders and shipments, reducing reporting time.
-
-Delivered interactive dashboards that provide actionable insights into sales trends, shipment delays, and customer behaviour.
-
-Enabled business users to identify bottlenecks and optimise supply chain efficiency.
-
-👉 This way, recruiters/technical reviewers who land on your GitHub see: problem → tools → value delivered.
-
-Do you want me to also rewrite your other GitHub project descriptions (like Customer Churn, Supply Chain, etc.) so they all follow this clear, business-value format?
