@@ -1,4 +1,4 @@
-**Sales Orders & Shipment Data Warehouse (Python)**
+**Sales Orders & Shipment Data Pipeline (Python)**
 ---
 This project showcase how to build an end-to-end data warehouse and reporting solution for sales orders and shipment data using medallion architecture best practices which extract data from ultiple sources and stored in its raw form in a bronze layer, then goes through different layers of transformation with the outcome stored in a silver layer, the final layer is where the business rules are applied and outcome is stored in the gold layer, which indicates the data in this layer is ready for analysis and reporting purposes.
 
@@ -13,7 +13,7 @@ Please note that, all data used in this project is simulated and generated for l
 **Project Overview**
 ---
 This project covers the full data lifecycle:
-- Data Architecture: Designing a modern Data Warehouse using the Medallion Architecture Bronze, Silver, and Gold layers
+- Data Architecture: Designing a modern Data pipeline using the Medallion Architecture Bronze, Silver, and Gold layers
 - ETL Pipelines: Extracting, transforming, and loading data from POS and ERP source systems into the warehouse
 - Data Modelling: Designed a star schema for orders, shipments, customers, and products, supporting scalable analytics.
 - Analytical & Reporting creating SQL-based reports using Views and dashboards to deliver actionable insights for stakeholders.
