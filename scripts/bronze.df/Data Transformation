@@ -1,10 +1,100 @@
-/*===========================================================================================
-Objective 1:
-## Data Cleaning: Whitespace trimming, unwanted characters removed, Numerical fields normalised
-## Clean and standardise unique identifier
-## Ensured naming convention in both tables follow a consistent format
-## Data Transformation: finding and Filling N/a Values
-## Data standardisation (Euros, £,$) converted to USD format
-## Derived columns(Customer_country, customer_state & Customer_postcode) from existing column
-## remove duplicates
-============================================================================================*/
+/*-- --------------------------------------------------------------------------------------------------------
+'---------------------- define reusable python functions ----------------;
+-- --------------------------------------------------------------------------------------------------------*/
+def strip_whitespace(df, cols):
+    df[cols] = df[cols].astype(str).apply(lambda x: x.str.strip())
+    return df
+
+def remove_special_chars(df, cols, pattern=r"[',\-_&~.*+()]"):
+    df[cols] = df[cols].replace(pattern, '', regex=True)
+    return df
+
+def convert_to_category(df, cols):
+    df[cols] = df[cols].astype("category")
+    return df
+
+def convert_currency_to_usd(value, rates={"USD":1, "GBP":1.25, "EUR":1.17}):
+    val = str(value).strip().upper()
+    amount = float(re.sub(r"[^\d.]", "", val))
+    if "USD" in val or "$" in val:
+        return int(amount * rates["USD"])
+    elif "GBP" in val or "£" in val or "POUND" in val:
+        return int(amount * rates["GBP"])
+    elif "EUR" in val or "€" in val:
+        return int(amount * rates["EUR"])
+    else:
+        return np.nan
+
+def currency_flag(value):
+    v = str(value).upper()
+    if "USD" in v or "$" in v:
+        return "USD"
+    elif "GBP" in v or "£" in v or "POUND" in v:
+        return "GBP"
+    elif "EUR" in v or "€" in v:
+        return "EUR"
+    else:
+        return "unknown"
+
+
+def map_gender(df, col):
+    df[col] = df[col].map({"M":"Male", "F":"Female", "":"Unknown"})
+    return df
+
+def map_status(df, col):
+    df[col] = df[col].map({"I":"Inactive", "A":"Active", "":"Unknown"})
+    return df
+
+
+def convert_dates(df, cols, fmt="%Y%m%d"):
+    for col in cols:
+        df[col.replace("_id","")] = pd.to_datetime(df[col].astype(str), format=fmt, errors='coerce')
+    return df
+
+--------------------------------------------------------------------------------------------
+    -- ERP Customer data transformation
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+objectives:
+
+## Rename columns
+## modify column, 'customer_name' from upper case to title case
+## strip unnecessary white spaces from all columns in df
+## Remove special characters from columns in df
+## convert customer_age to integer
+## convert customer_status and customer_gender to category datatype
+## convert attributes in customer_gender to a descriptive naming
+-----------------------------------------------------------------------------------------------
+## erp customers table
+df_cust_erp 
+
+## Rename columns
+df_cust_erp = df_cust_erp.rename(columns={
+        'id':'customer_id', 'status':'customer_status', 'names':'customer_name',
+        'address':'customer_address', 'email':'customer_email',
+        'gender':'customer_gender', 'Age':'customer_age'
+    })
+
+## modify column, 'customer_name' from upper case to title case
+df_cust_erp['customer_name'] = df_cust_erp['customer_name'].str.title()
+
+## strip unnecessary white spaces from all columns in df
+df_cust_erp = strip_whitespace(df_cust_erp, df_cust_erp.columns)
+
+## Remove special characters from columns in df
+df_cust_erp = remove_special_chars(df_cust_erp, ['customer_id','customer_name'])
+
+## convert customer_age to integer
+df_cust_erp['customer_age'] = df_cust_erp['customer_age'].astype(int)
+
+## convert customer_status and customer_gender to 'category' datatype
+df_cust_erp = convert_to_category(df_cust_erp, ['customer_status','customer_gender'])
+
+## convert attributes in customer_gender to a descriptive naming
+df_cust_erp = map_gender(df_cust_erp, 'customer_gender')
+
+df_cust_erp
+
+/*--------------------------------------------------------------------------------------------
+    -- POS Customer data transformation
+---------------------------------------------------------------------------------------------*/
