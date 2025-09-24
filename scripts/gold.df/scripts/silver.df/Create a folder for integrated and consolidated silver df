@@ -1,7 +1,18 @@
-## saving consolidated silver table as a parquet file
+/*
+===================================================================================================
+Creating a folder for consolidated & integrated silver dataframe (silver layer)
+==================================================================================================
+Script purpose:
+  This script saves integrated & consolidated silver dataframe in a folder as a parquet file.
 
 import os
-
+import pandas as pd
+================================================================================================
+Action performed:
+- defines folder path
+- creates folder if it does not exist
+- save transformed data as a parquet file in a silver folder.
+=================================================================================================
 # Define folder path
 BASE_PATH = r"C:\Users\sy2825\Downloads\Python & pbi\silver file"
 
