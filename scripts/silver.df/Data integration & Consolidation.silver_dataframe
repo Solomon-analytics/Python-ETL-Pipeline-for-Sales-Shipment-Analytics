@@ -1,0 +1,65 @@
+/*
+=========================================================================
+Load Silver Layer (Bronze --> silver)
+=========================================================================
+Script purpose:
+  This script populates the silver dataframes from the bronze dataframe
+  by consolidating transformed dataframes from the bronze folder.
+Action performed:
+- consolidate similar transformed dataframes
+- check for duplicates
+- create additional columns based on business requirements
+- create a validation flags for future data entries
+- create a creation date column that indicates when dataframe was created
+==========================================================================
+Defining resusable python functions:
+
+def age_category(age):
+    try:
+        age = int(age)
+    except (ValueError, TypeError):
+        return "Unknown"
+
+    if age < 18:
+        return "<18"
+    elif 18 <= age <= 35:
+        return "18-35"
+    elif 36 <= age <= 50:
+        return "36-50"
+    elif age > 50:
+        return "50+"
+    else:
+        return "Unknown"
+
+
+def split_address(full_address):
+    try:
+        parts = [p.strip() for p in full_address.split(",")]
+
+        # Address = first 2 parts
+        address = ", ".join(parts[0:2])
+
+        # City = third part
+        city = parts[2] if len(parts) > 2 else None
+
+        # Country = extract text inside parentheses
+        country_match = re.search(r"\((.*?)\)", full_address)
+        country = country_match.group(1) if country_match else None
+
+        return address, city, country
+    except Exception:
+        return None, None, None, None
+
+
+def extract_after_last(value):
+    """Extract substring after the last ~ character."""
+    if not isinstance(value, str):
+        return None
+    return value.split("~")[-1].strip()
+============================================================================================
+
+
+
+
+
+
