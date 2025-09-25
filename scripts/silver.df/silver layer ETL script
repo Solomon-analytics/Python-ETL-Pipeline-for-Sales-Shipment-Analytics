@@ -82,14 +82,30 @@ def extract_after_last(value):
 
 # -------------------------------------------------------------------------------------------------------
 # Customers Consolidation
-# -------------------------------------------------------------------------------------------------------
-df_silv_cust = pd.concat([df_cust_erp, df_cust_pos], ignore_index=True)
-print("Duplicates in customer dataframe:", df_silv_cust.duplicated().sum())
 
+objectives:
+
+# consolicate transformed (ERP & POS) dataframe
+# check for duplicates
+# creating additional column, age_category
+# create addditional columns, customer_address, customer_city, customer_country
+# create a column df_created_at
+# -------------------------------------------------------------------------------------------------------
+# consolicate transformed (ERP & POS) dataframe
+df_silv_cust = pd.concat([df_cust_erp, df_cust_pos], ignore_index=True)
+
+# check for duplicates
+df_silv_cust.duplicated().sum())
+
+# creating additional column, age_category
 df_silv_cust["age_category"] = df_silv_cust["customer_age"].apply(age_category)
+
+# create addditional columns, customer_address, customer_city, customer_country
 df_silv_cust[["customer_address", "customer_city", "customer_country"]] = (
     df_silv_cust["customer_address"].apply(lambda x: pd.Series(split_address(x)))
 )
+
+# create a column df_created_at
 df_silv_cust["df_created_at"] = datetime.now()
 
 # -------------------------------------------------------------------------------------------------------
