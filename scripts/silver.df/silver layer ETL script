@@ -1,0 +1,208 @@
+# =======================================================================================================
+# ====================================== Silver Layer Data Load =========================================
+# =======================================================================================================
+
+Script Purpose:
+    - Save transformed Bronze dataframes into a folder as Parquet files
+    - Consolidate ERP & POS datasets into unified Silver dataframes
+    - Apply data enrichment (e.g., age categories, product categories, derived columns)
+    - Apply business validation rules for data quality checks
+    - Add audit columns (e.g., df_created_at)
+
+
+# -------------------------------------------------------------------------------------------------------
+# Imports
+# -------------------------------------------------------------------------------------------------------
+import os
+import re
+import numpy as np
+import pandas as pd
+from datetime import datetime
+
+# -------------------------------------------------------------------------------------------------------
+# Save Bronze Data as Parquet (Bronze --> Silver)
+# -------------------------------------------------------------------------------------------------------
+BASE_PATH = r"C:\Users\sy\Downloads\Python & pbi\Bronze file"
+os.makedirs(BASE_PATH, exist_ok=True)
+
+df_cust_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_customers.parquet"), index=False)
+df_cust_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_customers.parquet"), index=False)
+df_prd_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_products.parquet"), index=False)
+df_prd_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_products.parquet"), index=False)
+df_str_prd_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_store_products.parquet"), index=False)
+df_str_prd_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_store_products.parquet"), index=False)
+df_str_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_store.parquet"), index=False)
+df_str_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_store.parquet"), index=False)
+df_sls_prs.to_parquet(os.path.join(BASE_PATH, "bronze_sales_person.parquet"), index=False)
+df_sls_ord.to_parquet(os.path.join(BASE_PATH, "bronze_erp_sales_order.parquet"), index=False)
+df_sls_ord_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_sales_order.parquet"), index=False)
+df_shp_erp.to_parquet(os.path.join(BASE_PATH, "bronze_erp_ship.parquet"), index=False)
+df_shp_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_ship.parquet"), index=False)
+
+# -------------------------------------------------------------------------------------------------------
+# Reusable Functions
+# -------------------------------------------------------------------------------------------------------
+def age_category(age):
+    """Bucket ages into predefined ranges."""
+    try:
+        age = int(age)
+    except (ValueError, TypeError):
+        return "Unknown"
+
+    if age < 18:
+        return "<18"
+    elif 18 <= age <= 35:
+        return "18-35"
+    elif 36 <= age <= 50:
+        return "36-50"
+    elif age > 50:
+        return "50+"
+    return "Unknown"
+
+def split_address(full_address):
+    """Split full address into address, city, and country."""
+    try:
+        parts = [p.strip() for p in full_address.split(",")]
+
+        address = ", ".join(parts[0:2]) if len(parts) >= 2 else None
+        city = parts[2] if len(parts) > 2 else None
+
+        country_match = re.search(r"\((.*?)\)", full_address)
+        country = country_match.group(1) if country_match else None
+
+        return address, city, country
+    except Exception:
+        return None, None, None
+
+def extract_after_last(value):
+    """Extract substring after the last ~ character."""
+    if not isinstance(value, str):
+        return None
+    return value.split("~")[-1].strip()
+
+# -------------------------------------------------------------------------------------------------------
+# Customers Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_cust = pd.concat([df_cust_erp, df_cust_pos], ignore_index=True)
+print("Duplicates in customer dataframe:", df_silv_cust.duplicated().sum())
+
+df_silv_cust["age_category"] = df_silv_cust["customer_age"].apply(age_category)
+df_silv_cust[["customer_address", "customer_city", "customer_country"]] = (
+    df_silv_cust["customer_address"].apply(lambda x: pd.Series(split_address(x)))
+)
+df_silv_cust["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Products Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_prd = pd.concat([df_prd_erp, df_prd_pos], ignore_index=True)
+print("Duplicates in product dataframe:", df_silv_prd.duplicated().sum())
+
+prod_cat = [
+    "Beauty Personal Care", "Automotive", "Fashion Apparel",
+    "Home Living", "Electronics", "Sports Fitness"
+]
+
+def extract_category(product_name):
+    """Extract product category from product_name."""
+    name = product_name.strip().lower()
+    for cat in prod_cat:
+        if all(word in name for word in cat.lower().split()):
+            return cat
+    return "Unknown"
+
+df_silv_prd["product_category"] = df_silv_prd["product_name"].apply(extract_category)
+df_silv_prd["category_valid_flag"] = df_silv_prd["product_category"].apply(
+    lambda x: "Valid" if x != "Unknown" else "Invalid"
+)
+df_silv_prd["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Store Products Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_str_prd = pd.concat([df_str_prd_erp, df_str_prd_pos], ignore_index=True)
+df_silv_str_prd["product_id"] = df_silv_str_prd["product_id"].apply(extract_after_last)
+
+df_silv_str_prd[["available_quantity", "blocked_quantity"]] = (
+    df_silv_str_prd[["available_quantity", "blocked_quantity"]].astype(int)
+)
+
+df_silv_str_prd["reserved_inventory"] = df_silv_str_prd["blocked_quantity"].fillna(0)
+df_silv_str_prd["unreserved_inventory"] = (
+    df_silv_str_prd["available_quantity"].fillna(0) -
+    df_silv_str_prd["blocked_quantity"].fillna(0)
+)
+df_silv_str_prd["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Store Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_str = pd.concat([df_str_erp, df_str_pos], ignore_index=True)
+df_silv_str[["store_address", "store_city", "store_country"]] = (
+    df_silv_str["store_location_address"].apply(lambda x: pd.Series(split_address(x)))
+)
+df_silv_str["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Sales Person
+# -------------------------------------------------------------------------------------------------------
+df_silv_sls_prs = df_sls_prs.copy()
+df_silv_sls_prs["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Sales Orders Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_sls_ord = pd.concat([df_sls_ord, df_sls_ord_pos], ignore_index=True)
+print("Duplicates in sales orders dataframe:", df_silv_sls_ord.duplicated().sum())
+
+invalid_qty = (
+    (df_silv_sls_ord["cancelled_quantity"].fillna(0) +
+     df_silv_sls_ord["returned_quantity"].fillna(0)) >
+    df_silv_sls_ord["ordered_quantity"].fillna(0)
+)
+
+df_silv_sls_ord.loc[invalid_qty, ["ordered_quantity","cancelled_quantity","returned_quantity"]] = np.nan
+df_silv_sls_ord["quantity_validation_flag"] = np.where(invalid_qty, "Invalid", "Valid")
+
+df_silv_sls_ord["order_date_validation_flag"] = np.where(
+    (df_silv_sls_ord["order_creation_date"] > df_silv_sls_ord["customer_request_date"]) |
+    (df_silv_sls_ord["order_creation_date"] > df_silv_sls_ord["actual_shipment_date"]),
+   "Invalid", "Valid"
+)
+
+df_silv_sls_ord["purchased_quantity"] = (
+    df_silv_sls_ord["ordered_quantity"].fillna(0) -
+    (df_silv_sls_ord["returned_quantity"].fillna(0) +
+     df_silv_sls_ord["cancelled_quantity"].fillna(0))
+).astype(int)
+
+df_silv_sls_ord["df_created_at"] = datetime.now()
+
+# -------------------------------------------------------------------------------------------------------
+# Ship Consolidation
+# -------------------------------------------------------------------------------------------------------
+df_silv_shp = pd.concat([df_shp_pos, df_shp_erp], ignore_index=True)
+print("Duplicates in ship dataframe:", df_silv_shp.duplicated().sum())
+
+df_silv_shp = df_silv_shp.drop(columns=["freight_amount", "freight_amount_usd", "freight_currency_flag"])
+
+invalid_qty = (
+    (df_silv_shp["cancelled_quantity"].fillna(0) +
+     df_silv_shp["delivered_quantity"].fillna(0)) >
+    df_silv_shp["shipped_quantity"].fillna(0)
+)
+
+df_silv_shp.loc[invalid_qty, ["shipped_quantity","cancelled_quantity","delivered_quantity"]] = np.nan
+df_silv_shp["quantity_validation_flag"] = np.where(invalid_qty, "Invalid", "Valid")
+
+df_silv_shp["delivered_quantity"] = (
+    df_silv_shp["shipped_quantity"].fillna(0) -
+    df_silv_shp["cancelled_quantity"].fillna(0)
+)
+
+df_silv_shp["delivery_ship_date_validation_flag"] = np.where(
+    (df_silv_shp["delivery_date"] < df_silv_shp["ship_date"]),
+    "Invalid", "Valid"
+)
+
+df_silv_shp["df_created_at"] = datetime.now()
