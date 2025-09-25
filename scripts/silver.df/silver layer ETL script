@@ -43,7 +43,7 @@ df_shp_pos.to_parquet(os.path.join(BASE_PATH, "bronze_pos_ship.parquet"), index=
 # Reusable Functions
 # -------------------------------------------------------------------------------------------------------
 def age_category(age):
-    """Bucket ages into predefined ranges."""
+    categorise ages into predefined ranges.
     try:
         age = int(age)
     except (ValueError, TypeError):
@@ -60,7 +60,7 @@ def age_category(age):
     return "Unknown"
 
 def split_address(full_address):
-    """Split full address into address, city, and country."""
+    Split full address into address, city, and country.
     try:
         parts = [p.strip() for p in full_address.split(",")]
 
@@ -75,7 +75,7 @@ def split_address(full_address):
         return None, None, None
 
 def extract_after_last(value):
-    """Extract substring after the last ~ character."""
+    Extract substring after the last ~ character.
     if not isinstance(value, str):
         return None
     return value.split("~")[-1].strip()
@@ -91,6 +91,7 @@ objectives:
 # create addditional columns, customer_address, customer_city, customer_country
 # create a column df_created_at
 # -------------------------------------------------------------------------------------------------------
+
 # consolicate transformed (ERP & POS) dataframe
 df_silv_cust = pd.concat([df_cust_erp, df_cust_pos], ignore_index=True)
 
@@ -108,19 +109,32 @@ df_silv_cust[["customer_address", "customer_city", "customer_country"]] = (
 # create a column df_created_at
 df_silv_cust["df_created_at"] = datetime.now()
 
+
 # -------------------------------------------------------------------------------------------------------
 # Products Consolidation
-# -------------------------------------------------------------------------------------------------------
-df_silv_prd = pd.concat([df_prd_erp, df_prd_pos], ignore_index=True)
-print("Duplicates in product dataframe:", df_silv_prd.duplicated().sum())
+objectives:
 
+# consolicate transformed products (ERP & POS) dataframe
+# check for duplicates
+# creating additional column, product_category
+# create validation flag: to check if future data entries is the same as current data entry
+# create a column df_created_at
+# -------------------------------------------------------------------------------------------------------
+
+# consolicate transformed products (ERP & POS) dataframe
+df_silv_prd = pd.concat([df_prd_erp, df_prd_pos], ignore_index=True)
+
+# check for duplicates
+df_silv_prd.duplicated().sum())
+
+# creating additional column, product_categor
 prod_cat = [
     "Beauty Personal Care", "Automotive", "Fashion Apparel",
     "Home Living", "Electronics", "Sports Fitness"
 ]
 
 def extract_category(product_name):
-    """Extract product category from product_name."""
+    ## Extract product category from product_name.
     name = product_name.strip().lower()
     for cat in prod_cat:
         if all(word in name for word in cat.lower().split()):
@@ -131,6 +145,8 @@ df_silv_prd["product_category"] = df_silv_prd["product_name"].apply(extract_cate
 df_silv_prd["category_valid_flag"] = df_silv_prd["product_category"].apply(
     lambda x: "Valid" if x != "Unknown" else "Invalid"
 )
+
+# create a column df_created_at
 df_silv_prd["df_created_at"] = datetime.now()
 
 # -------------------------------------------------------------------------------------------------------
