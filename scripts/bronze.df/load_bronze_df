@@ -7,7 +7,7 @@ Script Purpose:
      - import necessary packages needed for this load
      - defines reusable python functions
 -- -------------------------------------------------------------------------------------------------------
-SELECT '---------------------- Import Python packages ----------------';
+SELECT '---------------------- Import Python libraries ----------------';
 -- -------------------------------------------------------------------------------------------------------
 import pandas as pd
 import numpy as np
