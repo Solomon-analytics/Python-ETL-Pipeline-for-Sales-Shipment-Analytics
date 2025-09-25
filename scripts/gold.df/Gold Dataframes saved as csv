@@ -1,0 +1,42 @@
+# =======================================================================================================
+# ====================================== Gold Layer ETL =========================================
+# =======================================================================================================
+
+Script Purpose:
+    - Save transformed gold dataframes into a folder as csv files
+    - this is a business data ready for data analysis and report development.
+# -------------------------------------------------------------------------------------------------------
+# Save gold Dataframes as csv (gold --> csv)
+# -------------------------------------------------------------------------------------------------------
+
+# ==============================================================================================================
+# saving gold layer dataframes as csv file - ready to be used for data analysis projects and report development
+# ===============================================================================================================
+import os
+
+# Define folder path
+BASE_PATH = r"C:\Users\sy2825\Downloads\Python & pbi\gold file"
+
+# Create folder if it doesn’t exist
+os.makedirs(BASE_PATH, exist_ok=True)
+
+## save gold layer customers dataframe
+df_gold_dim_customers.to_csv(os.path.join(BASE_PATH, "df_gold_dim_customers.csv"), index=False)
+
+## save gold layer products table dataframe
+df_gold_dim_products.to_csv(os.path.join(BASE_PATH, "df_gold_dim_products.csv"), index=False)
+
+## save gold layer store products dataframe
+df_gold_fact_store_products.to_csv(os.path.join(BASE_PATH, "df_gold_fact_store_products.csv"), index=False)
+
+## save gold layer store dataframe
+df_gold_dim_store.to_csv(os.path.join(BASE_PATH, "df_gold_dim_store.csv"), index=False)
+
+## save gold layer sales person dataframe
+df_gold_dim_sales_person.to_csv(os.path.join(BASE_PATH, "df_gold_dim_sales_person.csv"), index=False)
+
+## save gold layer sales order dataframe
+df_gold_fact_sales_orders.to_csv(os.path.join(BASE_PATH, "df_gold_fact_sales_orders.csv"), index=False)
+
+## save gold layer ship dataframe
+df_gold_fact_ship.to_csv(os.path.join(BASE_PATH, "df_gold_fact_ship.csv"), index=False)
