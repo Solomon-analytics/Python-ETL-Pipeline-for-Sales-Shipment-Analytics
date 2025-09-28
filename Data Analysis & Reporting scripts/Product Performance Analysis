@@ -1,0 +1,71 @@
+=================================================================================================
+                         Product Performance Analysis
+=================================================================================================
+
+=================================================================================================
+   Product Category Revenue performance
+=================================================================================================
+## products category revenue distribution
+df_gold_fact_sales_orders.groupby(["product_category"])["net_order_value_usd"].sum().sort_values(ascending = False).plot(kind = "bar")
+plt.xlabel(order_month)
+plt.ylabel("product category")
+plt.title("revenue generated over the years")
+plt.show()
+
+# Revenue generated across each of the product category (Aggregated by : Year)
+df_products_category_performance = (
+    df_gold_fact_sales_orders.groupby(["year","product_category"])["net_order_value_usd"]
+    .sum()
+    .reset_index()
+)
+
+# what is the overall average revenue generated across years recorded
+df_products_category_performance["overall_avg"] = (
+    df_products_category_performance.groupby("year")["net_order_value_usd"].transform("mean")
+)
+
+
+# net order value usd vs overall average categorisation
+
+df_products_category_performance["performance_flag"] = np.where(
+    df_products_category_performance["net_order_value_usd"] > df_products_category_performance["overall_avg"],
+    "Above Average", "Below Average"
+)
+
+=============================================================================================
+# visual representation of product_category performance vs the overall revenue average
+=============================================================================================
+
+# a. create a pivot table to detetmine what the average is for each products category for each year?
+heatmap_data = df_products_category_performance.pivot(
+    index="product_category",
+    columns="year",
+    values="net_order_value_usd"
+)
+
+# b. compare the average each product category generated to the overall average
+flag_mask = (heatmap_data <
+             df_products_category_performance.groupby("year")["overall_avg"].first().values)
+
+# c. Pivot data for heatmap
+heatmap_data =  df_products_category_performance.pivot(
+    index="product_category",
+    columns="year",
+    values="net_order_value_usd")
+
+
+# d. Create heatmap
+plt.figure(figsize=(12, 6))
+sns.heatmap(
+    heatmap_data,
+    annot=True, fmt=".0f",
+    cmap="RdYlGn",  # green for high, red for low
+    cbar_kws={'label': 'Revenue (USD)'}
+)
+
+plt.title("Product category Revenue vs Overall Average Benchmark")
+plt.ylabel("Product Name")
+plt.xlabel("Year")
+plt.show()
+
+
