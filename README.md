@@ -1,7 +1,3 @@
-Perfect — thanks for laying out your draft 👌. What you’ve written is already strong; it just needs to be tightened into **clear, human language** with less “AI-style” phrasing and more natural flow. Here’s a rewritten version you can use for GitHub, CV, or portfolio:
-
----
-
 # Python ETL Pipeline for Sales & Shipment Analytics
 
 This project shows how I built an end-to-end **ETL pipeline in Python** to process and prepare **sales orders and shipment data** for analysis and reporting. The pipeline follows the **Bronze → Silver → Gold layered approach**, which keeps raw data separate from cleaned and business-ready datasets.
