@@ -1,0 +1,90 @@
+========================================================================================================
+# Merge sales orders with customer data (country, age)
+========================================================================================================
+df_gold_fact_sales_order_new = (
+    df_gold_fact_sales_orders
+    .merge(
+        df_gold_dim_customers[["customer_id", "customer_country", "age_category"]],
+        on="customer_id",
+        how="left"
+    )
+)
+
+=========================================================================================================
+# Ranking customers by purchase activity, order frequency, product variety, and revenue
+=========================================================================================================
+
+customer_performance = (
+    df_gold_fact_sales_order_new.groupby(["customer_id", "customer_name", "customer_country", "age_category"])
+    .agg(
+        total_purchases=("purchased_quantity", "sum"),
+        line_number=("order_id", "nunique"),
+        distinct_product_purchased=("product_id", "nunique"),
+        gross_sales=("net_order_value_usd", "sum"),
+        first_purchase=("order_creation_date", "min"),
+        last_purchase=("order_creation_date", "max")
+    )
+    .reset_index()
+)
+
+# Calculate Average Order Value
+customer_performance["average_order_value"] = (
+    customer_performance["gross_sales"] / customer_performance["line_number"]
+)
+
+# Sort customers by revenue
+customer_performance = customer_performance.sort_values(
+    by="gross_sales", ascending=False
+).reset_index(drop=True)
+
+customer_performance
+
+====================================================================================================
+#. Business Question: Where are our top customers from (by revenue)?
+====================================================================================================
+
+df_gold_fact_sales_order_new.groupby("customer_country")["net_order_value_usd"].sum().sort_values(ascending=False).plot(kind="bar")
+plt.xlabel("Customer Country")
+plt.ylabel("Gross Sales (USD)")
+plt.title("Gross Sales by Customer Country")
+plt.show()
+
+=====================================================================================================
+#. Business Question: What age category contributes most to revenue?
+=====================================================================================================
+
+df_gold_fact_sales_order_new.groupby("age_category")["net_order_value_usd"].sum().sort_values(ascending=False).plot(kind="bar")
+plt.xlabel("Age Category")
+plt.ylabel("Gross Sales (USD)")
+plt.title("Gross Sales by Age Category")
+plt.show()
+
+=====================================================================================================
+#. Business Question: Which products are most popular with high-value vs low-value customers?
+=====================================================================================================
+
+# Define high-value customers as top 20% by revenue
+customer_revenue = (
+    df_gold_fact_sales_orders.groupby("customer_id")["net_order_value_usd"]
+    .sum()
+    .reset_index()
+)
+
+threshold = customer_revenue["net_order_value_usd"].quantile(0.8)
+high_value_customers = customer_revenue[customer_revenue["net_order_value_usd"] >= threshold]["customer_id"]
+
+df_gold_fact_sales_orders["customer_segment"] = np.where(
+    df_gold_fact_sales_orders["customer_id"].isin(high_value_customers),
+    "High Value",
+    "Low Value"
+)
+
+segment_analysis = (
+    df_gold_fact_sales_orders.groupby(["customer_segment", "product_category"])["purchased_quantity"]
+    .sum()
+    .reset_index()
+    .sort_values(["customer_segment", "purchased_quantity"], ascending=[True, False])
+)
+
+segment_analysis
+
