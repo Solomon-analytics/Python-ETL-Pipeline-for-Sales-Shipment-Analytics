@@ -63,5 +63,10 @@ Data is simulated and generated mainly for learning purposes.
 * Created **trusted, analysis-ready datasets** in the Gold layer.
 * Delivered **interactive Power BI dashboards** that reveal sales trends, customer behavior, and shipment performance.
 * Enabled business users to **identify bottlenecks** and optimize supply chain efficiency.
+---
+
+Below is the Medallion Architecture (Bronze → Silver → Gold) used in this project:
+
+![](medallion_architecture_diagram.svg)
 
 
