@@ -169,3 +169,42 @@ plt.title("YoY Growth (%) by Product Category and Year")
 plt.ylabel("Product Category")
 plt.xlabel("Year")
 plt.show()
+
+
+==================================================================================================
+Business Question: Which products/names are growing the fastest?
+==================================================================================================
+
+# Revenue by product & year
+revenue_trends = (
+    df_gold_fact_sales_orders.groupby(["year", "product_name"])["net_order_value_usd"]
+    .sum()
+    .reset_index()
+    .sort_values(["product_name", "year"])
+)
+
+# Calculate YoY growth %
+revenue_trends["yoy_growth"] = (
+    revenue_trends.groupby("product_name")["net_order_value_usd"]
+    .pct_change() * 100
+)
+
+# Create a flag for growth vs decline
+revenue_trends["growth_flag"] = revenue_trends["yoy_growth"].apply(
+    lambda x: "Growth" if x > 0 else ("Decline" if pd.notnull(x) else "N/A")
+)
+
+# Pivot for heatmap
+pivot_table = revenue_trends.pivot(
+    index="product_name",
+    columns="year",
+    values="yoy_growth"
+)
+
+# Plot heatmap
+plt.figure(figsize=(12, 6))
+sns.heatmap(pivot_table, annot=True, fmt=".1f", cmap="RdYlGn", center=0)
+plt.title("YoY Growth (%) by Product name and Year")
+plt.ylabel("Product name")
+plt.xlabel("Year")
+plt.show()
