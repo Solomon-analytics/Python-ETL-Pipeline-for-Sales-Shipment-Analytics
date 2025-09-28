@@ -67,6 +67,6 @@ Data is simulated and generated mainly for learning purposes.
 
 Below is the Medallion Architecture (Bronze → Silver → Gold) used in this project:
 
-![](medallion_architecture_diagram.svg)
+![]py_erd_diagram.drawio.svg)
 
 
