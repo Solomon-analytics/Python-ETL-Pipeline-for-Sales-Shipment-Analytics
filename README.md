@@ -48,9 +48,9 @@ This project shows how I built an end-to-end **ETL pipeline in Python** to proce
 
 From the Gold layer datasets, I explored and reported on:
 
-* Customer purchasing patterns
+* Customer purchase vs revenue analysis
 * Product performance across categories
-* Sales order trends over time
+* Sales orders analysis
 * Order fulfilment efficiency (order creation --> shipment)
 
 Interactive **Power BI dashboards** were built to make these insights accessible to stakeholders.
