@@ -49,7 +49,7 @@ From the Gold layer datasets, I explored and reported on:
 * Customer purchasing patterns
 * Product performance across categories
 * Sales order trends over time
-* Shipment efficiency and delays
+* Order fulfilment efficiency (order creation --> shipment)
 
 Interactive **Power BI dashboards** were built to make these insights accessible to stakeholders.
 
