@@ -30,7 +30,7 @@ This project shows how I built an end-to-end **ETL pipeline in Python** to proce
 * **ERP system**: sales orders, products, store data, shipments
 * **POS system**: sales transactions, product details, customer information, shipments
   
- **Note on Data**: This project uses **synthetic data generated for learning purposes**. However, the all the steps documented in this project demonstrates how the same
+ **Note on Data**: This project uses **synthetic data generated for learning purposes**. However, the processes documented in this project demonstrates how the same
   method could be applied to real business data.
 
 ---
