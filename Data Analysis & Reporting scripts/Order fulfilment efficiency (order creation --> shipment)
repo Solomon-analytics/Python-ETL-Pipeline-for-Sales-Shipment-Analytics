@@ -49,7 +49,7 @@ plt.ylabel("")  # remove y-label
 plt.show()
 
 
-![](py_erd_diagram-Page.svg)
+
 
 ## Insights: outcome reveals only 10% of orders arrived on time, while 90% were late.
 
