@@ -1,0 +1,185 @@
+#===================================================================================== 
+              Order fulfilment efficiency (order creation --> shipment)
+=====================================================================================#
+
+======================================================================================
+# Merge Shipment df with sales orders df
+======================================================================================
+df_gold_fact_ship_new = (
+    df_gold_fact_ship
+    .merge(df_gold_fact_sales_orders[["order_id", "customer_request_date", "order_creation_date"]], 
+    on ="order_id", how = "left"))
+
+=====================================================================================
+# filter valid records
+=====================================================================================
+
+df_gold_fact_ship_filtered = df_gold_fact_ship_new[(df_gold_fact_ship_new["ordered_cancelled_received_quantity_validation_flag"] == 'Y') 
+& (df_gold_fact_ship_new["delivery_ship_date_validation_flag"] == 'valid')]
+
+df_gold_fact_ship_filtered
+
+==================================================================================================================
+# 1. On-time vs Late arrival analysis
+Purpose: Categorise orders based on whether they arrived on or before customer's requested date.
+==================================================================================================================
+df_gold_fact_ship_filtered["on_time"] = np.where(
+    df_gold_fact_ship_filtered["delivery_date"] <= df_gold_fact_ship_filtered["customer_request_date"],
+    "On-time", "Late arrival"
+)
+
+============================================================================================
+# create a visualisation to uncover insight on On-time vs Late arrival analysis
+================================================================================================
+# count categories
+counts = df_gold_fact_ship_filtered["on_time"].value_counts()
+
+# plot pie chart
+plt.figure(figsize=(6,6))
+counts.plot(
+    kind="pie",
+    autopct="%.1f%%",   # show percentage with 1 decimal place
+    startangle=90,      # rotate start
+    colors=["#e74c3c", "#2ecc71"],  # green for on-time, red for overdue
+    wedgeprops={"edgecolor":"white"}
+)
+
+plt.title("Shipment Efficiency: On-time vs Overdue Deliveries", fontsize=14, fontweight="bold")
+plt.ylabel("")  # remove y-label
+plt.show()
+
+
+
+
+## Insights: outcome reveals only 10% of orders arrived on time, while 90% were late.
+
+========================================================================================
+## Analysis to better understand the cause of this?
+========================================================================================
+
+========================================================================================
+# 2. Delivery Time Distribution (Ship ---> Devlivery)
+Purpose: Measure how long it takes to be delivered once shipped.
+========================================================================================
+
+# creating a custom column that determines days it takes to deliver customer orders after it's been shipped?
+
+df_gold_fact_ship_filtered["delivery_days"] = (
+    df_gold_fact_ship_filtered["delivery_date"] - df_gold_fact_ship_filtered["ship_date"]
+).dt.days
+
+# categorising the delivery days
+
+def categorise_delivery_days(x):
+    if x <= 5:
+        return "0-5 days"
+    elif x <= 10:
+        return "6-10 days"
+    elif x <= 15:
+        return "11-15 days"
+    elif x <= 20:
+        return "16-20 days"
+    elif x <= 25:
+        return "21-25 days"
+    elif x <= 30:
+        return "26-30 days"
+    else:
+        return "Over 30 days"
+
+df_gold_fact_ship_filtered["delivery_category"] = df_gold_fact_ship_filtered["delivery_days"].apply(categorize_delivery_days)
+
+==============================================================================================
+## Bar chart of percentage(%) shipments by delivery days category
+==============================================================================================
+
+deliver_category_count = df_gold_fact_ship_filtered["delivery_category"].value_counts(normalize=True) * 100
+deliver_category_count
+
+# plot bar chart
+
+plt.figure(figsize=(8,6))
+bars = deliver_category_count.sort_index().plot(
+    kind="bar",
+    color="#3498db",  # blue bars
+    edgecolor="black"
+)
+
+# annotate percentages on bars
+for i, val in enumerate(deliver_category_count.sort_index()):
+    plt.text(i, val + 1, f"{val:.1f}%", ha="center", fontsize=10, fontweight="bold")
+
+# labels and title
+plt.title("Shipment Delivery Time Distribution", fontsize=14, fontweight="bold")
+plt.xlabel("Delivery Time Category")
+plt.ylabel("Percentage of Shipments")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Insight: Nearly 47% of shipment arrived within 0-5days after being shipped, and 15.5% within 6-10days.
+However, most of these still miss customer-requested deadlines, indicating shipment issues.
+
+## Analysis on what may be wrong, why are deliveries not arrving on-time?
+
+=========================================================================================
+            Days from Order Creation ---> Shipment
+=========================================================================================
+
+df_gold_fact_ship_filtered["days_to_ship"] = (
+   df_gold_fact_ship_filtered["ship_date"] - df_gold_fact_ship_filtered["order_creation_date"]).dt.days
+
+df_gold_fact_ship_filtered["days_to_ship"]
+
+
+# categorising the delivery days
+def categorise_days_to_ship(x):
+    if x <= 5:
+        return "0-5 days"
+    elif x <= 10:
+        return "6-10 days"
+    elif x <= 15:
+        return "11-15 days"
+    elif x <= 20:
+        return "16-20 days"
+    elif x <= 25:
+        return "21-25 days"
+    elif x <= 30:
+        return "26-30 days"
+    else:
+        return "Over 30 days"
+
+
+df_gold_fact_ship_filtered["days_to_ship_category"] = df_gold_fact_ship_filtered["days_to_ship"].apply(categorise_days_to_ship)
+
+
+days_to_ship_category_count = df_gold_fact_ship_filtered["days_to_ship_category"].value_counts(normalize=True) * 100
+days_to_ship_category_count
+
+=================================================================================================
+# plot bar chart
+=================================================================================================
+plt.figure(figsize=(8,6))
+bars = days_to_ship_category_count.sort_index().plot(
+    kind="bar",
+    color="#3498db",  # blue bars
+    edgecolor="black"
+)
+
+# annotate percentages on bars
+for i, val in enumerate(deliver_category_count.sort_index()):
+    plt.text(i, val + 1, f"{val:.1f}%", ha="center", fontsize=10, fontweight="bold")
+
+# labels and title
+plt.title("Days to Ship Distribution", fontsize=14, fontweight="bold")
+plt.xlabel("Days to ship Category")
+plt.ylabel("Percentage of Shipments")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+=======================================================================================================================
+Insight: The analysis of days between order creation and shipment shows that fulfilment delays are a key driver of
+late deliveries. Only 15% of orders were shipped within 0-5 days of being placed, while the majority (around 70%)
+took longer than 10 days to leave the store. This suggests that inefficiencies in order processing and fulfilment, rather
+than shipping transit times, are the main reason why customer requested date were not met.
+=======================================================================================================================
