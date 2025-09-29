@@ -48,6 +48,9 @@ plt.title("Shipment Efficiency: On-time vs Overdue Deliveries", fontsize=14, fon
 plt.ylabel("")  # remove y-label
 plt.show()
 
+
+![](ontime vs overdue.png)
+
 ## Insights: outcome reveals only 10% of orders arrived on time, while 90% were late.
 
 ========================================================================================
