@@ -72,7 +72,7 @@ Below is the workflow used in this project:
 
 --- 
 
-![Description of Image](path/to/ontime vs overdue.png)
+![Description of Image](py_erd_diagram-Page.svg)
 
 
 
