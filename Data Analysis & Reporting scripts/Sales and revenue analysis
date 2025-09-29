@@ -87,3 +87,30 @@ yoy_sales["yoy_pct_change_category"] = np.where(
     "Below Expectation"
 )
 yoy_sales
+
+
+=========================================================================================================
+Business Question: Are we seeing sustained growth momentum month-over-month?
+=========================================================================================================
+
+monthly_sales = (
+    df_gold_fact_sales_orders.groupby(["year","month"])["net_order_value_usd"]
+    .sum()
+    .reset_index()
+    .sort_values(["year","month"])
+)
+
+monthly_sales["MoM_growth"] = monthly_sales["net_order_value_usd"].pct_change() * 100
+
+plt.figure(figsize=(12, 5))
+sns.lineplot(
+    data=monthly_sales,
+    x=monthly_sales.index,
+    y="MoM_growth",
+    marker="o"
+)
+plt.axhline(0, color="red", linestyle="--")
+plt.title("Month-over-Month Growth Momentum")
+plt.ylabel("Growth %")
+plt.xlabel("Time Index (Chronological)")
+plt.show()
