@@ -70,9 +70,6 @@ Below is the workflow used in this project:
 
 ![](py_erd_diagram-Page.svg)
 
----
 
-
-![On-time vs Overdue Chart](ontime_vs_overdue.png)
 
 
