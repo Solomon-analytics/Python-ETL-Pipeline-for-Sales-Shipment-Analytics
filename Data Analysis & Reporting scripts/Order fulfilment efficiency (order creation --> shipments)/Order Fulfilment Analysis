@@ -109,7 +109,7 @@ for i, val in enumerate(deliver_category_count.sort_index()):
     plt.text(i, val + 1, f"{val:.1f}%", ha="center", fontsize=10, fontweight="bold")
 
 # labels and title
-plt.title("Shipment Delivery Time Distribution", fontsize=14, fontweight="bold")
+plt.title("Shipment Delivery Time Category Distribution", fontsize=14, fontweight="bold")
 plt.xlabel("Delivery Time Category")
 plt.ylabel("Percentage of Shipments")
 plt.xticks(rotation=45)
@@ -122,7 +122,7 @@ However, most of these still miss customer-requested deadlines, indicating shipm
 ## Analysis on what may be wrong, why are deliveries not arrving on-time?
 
 =========================================================================================
-            Days from Order Creation ---> Shipment
+            Days from Order Creation ---> Shipment Analysis
 =========================================================================================
 
 df_gold_fact_ship_filtered["days_to_ship"] = (
@@ -170,7 +170,7 @@ for i, val in enumerate(deliver_category_count.sort_index()):
     plt.text(i, val + 1, f"{val:.1f}%", ha="center", fontsize=10, fontweight="bold")
 
 # labels and title
-plt.title("Days to Ship Distribution", fontsize=14, fontweight="bold")
+plt.title("Days From Order Creation to Ship Distribution", fontsize=14, fontweight="bold")
 plt.xlabel("Days to ship Category")
 plt.ylabel("Percentage of Shipments")
 plt.xticks(rotation=45)
