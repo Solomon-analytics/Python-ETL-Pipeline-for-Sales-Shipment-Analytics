@@ -1,0 +1,116 @@
+==================================================================================================== 
+            Sales and revenue analysis
+====================================================================================================
+
+# Convert order date to datetime and extract year/month
+
+df_gold_fact_sales_orders["order_creation_date"] = pd.to_datetime(df_gold_fact_sales_orders["order_creation_date"])
+df_gold_fact_sales_orders["year"] = df_gold_fact_sales_orders["order_creation_date"].dt.year
+df_gold_fact_sales_orders["month"] = df_gold_fact_sales_orders["order_creation_date"].dt.month
+
+
+# Aggregate sales by year & month
+
+monthly_sales = (
+    df_gold_fact_sales_orders.groupby(["year","month"])["net_order_value_usd"]
+    .sum()
+    .reset_index()
+    .sort_values(["year","month"])
+)
+
+====================================================================================================
+#. Business Question: How have sales progressed over the years (total growth)?
+====================================================================================================
+df_gold_fact_sales_orders.groupby("year")["net_order_value_usd"].sum().plot(kind="line")
+plt.xlabel("Year")
+plt.ylabel("Cumulative Sales (USD)")
+plt.title("Total Sales Progression Over the Years")
+plt.show()
+
+====================================================================================================
+#. Business Question: What is the cumulative monthly sales distribution across all years?
+====================================================================================================
+
+df_gold_fact_sales_orders.groupby("month")["net_order_value_usd"].sum().plot(kind="line")
+plt.xlabel("Month")
+plt.ylabel("Cumulative Sales (USD)")
+plt.title("Cumulative Sales Distribution Across Months")
+plt.show()
+
+===================================================================================================
+#. Business Question: Is the business performing above or below overall average?
+===================================================================================================
+
+# Step a: overall monthly average sales across dataset
+overall_avg = monthly_sales["net_order_value_usd"].mean()
+
+# Step b: yearly average sales
+yearly_avg = (
+    monthly_sales.groupby("year")["net_order_value_usd"]
+    .mean()
+    .reset_index()
+    .rename(columns={"net_order_value_usd": "year_avg_sales"})
+)
+
+# Step c: performance flag
+yearly_avg["performance_flag"] = yearly_avg["year_avg_sales"].apply(
+    lambda x: "Above Average" if x > overall_avg
+    else "Below Average" if x < overall_avg
+    else "At Average"
+)
+yearly_avg
+
+===============================================================================================
+Business Question: How does this year’s monthly sales compare to previous years?
+===============================================================================================
+
+# Pivot sales by year and month
+yoy_sales = (
+    monthly_sales.pivot(index="month", columns="year", values="net_order_value_usd")
+    .sort_index()
+)
+
+# Identify latest and previous year
+latest_year = yoy_sales.columns.max()
+prev_year = latest_year - 1
+
+# Calculate YoY change
+yoy_sales["YoY_change"] = yoy_sales[latest_year] - yoy_sales[prev_year]
+yoy_sales["YoY_pct_change"] = (
+    (yoy_sales[latest_year] - yoy_sales[prev_year]) / yoy_sales[prev_year] * 100
+).round(2)
+
+# Flag months where performance exceeded expectations
+yoy_sales["yoy_pct_change_category"] = np.where(
+    yoy_sales[latest_year] > yoy_sales[prev_year],
+    "Exceed Last Year Sales",
+    "Below Expectation"
+)
+yoy_sales
+
+
+=========================================================================================================
+Business Question: Are we seeing sustained growth momentum month-over-month?
+=========================================================================================================
+
+monthly_sales = (
+    df_gold_fact_sales_orders.groupby(["year","month"])["net_order_value_usd"]
+    .sum()
+    .reset_index()
+    .sort_values(["year","month"])
+)
+
+monthly_sales["MoM_growth"] = monthly_sales["net_order_value_usd"].pct_change() * 100
+
+plt.figure(figsize=(12, 5))
+sns.lineplot(
+    data=monthly_sales,
+    x=monthly_sales.index,
+    y="MoM_growth",
+    marker="o"
+)
+plt.axhline(0, color="red", linestyle="--")
+plt.title("Month-over-Month Growth Momentum")
+plt.ylabel("Growth %")
+plt.xlabel("Time Index (Chronological)")
+plt.show()
