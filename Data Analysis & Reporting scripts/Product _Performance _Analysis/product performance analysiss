@@ -2,15 +2,23 @@
                          Product Performance Analysis
 =================================================================================================
 
+# Convert order date to datetime and extract year/month
+
+df_gold_fact_sales_orders["order_creation_date"] = pd.to_datetime(df_gold_fact_sales_orders["order_creation_date"])
+df_gold_fact_sales_orders["year"] = df_gold_fact_sales_orders["order_creation_date"].dt.year
+df_gold_fact_sales_orders["month"] = df_gold_fact_sales_orders["order_creation_date"].dt.month
+
 =================================================================================================
    Product Category Revenue performance
 =================================================================================================
 ## products category revenue distribution
 df_gold_fact_sales_orders.groupby(["product_category"])["net_order_value_usd"].sum().sort_values(ascending = False).plot(kind = "bar")
-plt.xlabel(order_month)
+plt.xlabel("net_order_value_usd (in million $)
 plt.ylabel("product category")
 plt.title("revenue generated over the years")
 plt.show()
+
+insight: The business top selling product category is fashion apparel, followed bu automotive, sport fitness
 
 # Revenue generated across each of the product category (Aggregated by : Year)
 df_products_category_performance = (
@@ -60,7 +68,7 @@ sns.heatmap(
     heatmap_data,
     annot=True, fmt=".0f",
     cmap="RdYlGn",  # green for high, red for low
-    cbar_kws={'label': 'Revenue (USD)'}
+    cbar_kws={'label': 'Revenue Benchmark'}
 )
 
 plt.title("Product category Revenue vs Overall Average Benchmark")
@@ -123,7 +131,7 @@ sns.heatmap(
     heatmap_data,
     annot=True, fmt=".0f",
     cmap="RdYlGn",  # green for high, red for low
-    cbar_kws={'label': 'Revenue (USD)'}
+    cbar_kws={'label': 'Revenue Benchmark'}
 )
 
 plt.title("Product Name Revenue vs Overall Average Benchmark")
