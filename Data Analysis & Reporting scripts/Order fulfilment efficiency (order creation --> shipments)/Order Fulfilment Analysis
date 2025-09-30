@@ -86,7 +86,7 @@ def categorise_delivery_days(x):
     else:
         return "Over 30 days"
 
-df_gold_fact_ship_filtered["delivery_category"] = df_gold_fact_ship_filtered["delivery_days"].apply(categorize_delivery_days)
+df_gold_fact_ship_filtered["delivery_category"] = df_gold_fact_ship_filtered["delivery_days"].apply(categorise_delivery_days)
 
 ==============================================================================================
 ## Bar chart of percentage(%) shipments by delivery days category
