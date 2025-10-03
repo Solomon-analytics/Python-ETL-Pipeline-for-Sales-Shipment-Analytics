@@ -18,8 +18,6 @@ plt.ylabel("product category")
 plt.title("revenue generated over the years")
 plt.show()
 
-insight: The business top selling product category is fashion apparel, followed bu automotive, sport fitness
-
 # Revenue generated across each of the product category (Aggregated by : Year)
 df_products_category_performance = (
     df_gold_fact_sales_orders.groupby(["year","product_category"])["net_order_value_usd"]
