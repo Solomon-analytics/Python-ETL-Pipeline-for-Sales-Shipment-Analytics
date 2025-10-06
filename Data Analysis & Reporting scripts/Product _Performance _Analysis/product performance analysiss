@@ -15,7 +15,7 @@ df_gold_fact_sales_orders["month"] = df_gold_fact_sales_orders["order_creation_d
 df_gold_fact_sales_orders.groupby(["product_category"])["net_order_value_usd"].sum().sort_values(ascending = False).plot(kind = "bar")
 plt.xlabel("net_order_value_usd (in million $)")
 plt.ylabel("product category")
-plt.title("revenue generated over the years")
+plt.title("Product Category Revnue Distribution")
 plt.show()
 
 # Revenue generated across each of the product category (Aggregated by : Year)
